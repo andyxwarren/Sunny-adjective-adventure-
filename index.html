@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ Adjective Adventure! ✨</title>
+    <style>
+        /* --- Root Variables (unchanged) --- */
+        :root {
+            --bg-color: #e0f7fa;
+            --container-bg: #ffffff;
+            --primary-color: #00796b;
+            --secondary-color: #ff7043;
+            --accent-color: #fbc02d;
+            --correct-color: #4caf50;
+            --incorrect-color: #f44336;
+            --give-up-color: #757575;
+            --font-color: #37474f;
+            --letter-box-bg: #eceff1;
+            --letter-box-border: #b0bec5;
+            --hint-letter-color: #0d47a1;
+            --glow-color: #29b6f6; /* Light blue glow */
+        }
+
+        /* --- Body and General Styles (unchanged) --- */
+        body {
+            font-family: 'Arial', sans-serif; background-color: var(--bg-color); color: var(--font-color); display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; text-align: center; padding: 15px; box-sizing: border-box;
+            background-image: linear-gradient(45deg, #b2ebf2 25%, transparent 25%), linear-gradient(-45deg, #b2ebf2 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #b2ebf2 75%), linear-gradient(-45deg, transparent 75%, #b2ebf2 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+
+        /* --- Game Container (unchanged) --- */
+        #game-container {
+            background-color: var(--container-bg); padding: 25px 35px; border-radius: 20px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); max-width: 600px; width: 100%; border: 5px solid var(--primary-color); margin-bottom: 20px;
+        }
+        h1 { color: var(--primary-color); margin-bottom: 15px; font-size: 2.3em; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+
+        /* --- Skill Slider (unchanged) --- */
+        #skill-area {
+            margin-bottom: 20px; padding: 10px; background-color: #fff8e1; border-radius: 8px; border: 1px solid var(--accent-color);
+        }
+        #skill-area label { font-weight: bold; color: var(--primary-color); margin-right: 10px; }
+        #skill-slider { width: 50%; max-width: 200px; cursor: pointer; vertical-align: middle; }
+        #skill-level-display { display: inline-block; min-width: 60px; font-weight: bold; color: var(--secondary-color); vertical-align: middle; }
+
+        /* --- Score Board (unchanged) --- */
+        #score-board {
+             background-color: rgba(255, 255, 255, 0.9); padding: 10px 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); display: flex; justify-content: space-around; flex-wrap: wrap; gap: 15px; max-width: 600px; width: 100%; border: 2px solid var(--accent-color); font-size: 0.95em; margin-top: 20px; /* Add margin top */
+        }
+         #score-board div { text-align: center; }
+         #score-board span { font-weight: bold; font-size: 1.3em; display: block; margin-top: 3px; }
+        #score-perfect span { color: var(--correct-color); }
+        #score-helped span { color: var(--secondary-color); }
+        #score-skipped span { color: var(--give-up-color); }
+
+
+        /* --- Clues Area (unchanged) --- */
+        #clues-area { background-color: #e8f5e9; padding: 12px; border-radius: 10px; margin-bottom: 20px; border: 2px dashed var(--correct-color); }
+        #clues-area p { margin: 0 0 8px 0; font-weight: bold; color: var(--primary-color); }
+        #clues-list { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+        #clues-list li { background-color: var(--accent-color); color: #333; padding: 4px 9px; border-radius: 15px; font-size: 0.9em; font-style: italic; box-shadow: 1px 1px 3px rgba(0,0,0,0.1); }
+
+
+        /* --- Word Display Area (unchanged) --- */
+        #word-display-area { margin-bottom: 20px; padding: 15px; background-color: #fffde7; border-radius: 10px; border: 2px dashed #fbc02d; position: relative; cursor: pointer; }
+        #hidden-input { position: absolute; top: -50px; left: -9999px; width: 10px; height: 10px; opacity: 0; pointer-events: none; border: 0; padding: 0; margin: 0; font-size: 16px; }
+        #word-display { font-size: 2.5em; font-weight: bold; margin-bottom: 10px; color: var(--secondary-color); min-height: 55px; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 8px; }
+
+        /* --- Letter Box & Glow (unchanged) --- */
+        .letter-box {
+            display: inline-flex; justify-content: center; align-items: center; width: 40px; height: 50px; background-color: var(--letter-box-bg); border: 2px solid var(--letter-box-border); border-radius: 8px; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.1); text-transform: uppercase;
+            transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.3s ease;
+        }
+        .letter-box.hinted { color: var(--hint-letter-color); font-weight: bolder; background-color: #d1e9ff; }
+        .letter-box.filled { border-color: var(--secondary-color); color: var(--primary-color); }
+        .letter-box.next-letter { border-color: var(--glow-color); box-shadow: 0 0 10px 2px var(--glow-color), inset 1px 1px 3px rgba(0,0,0,0.1); }
+
+        #input-instructions { font-size: 0.85em; color: #757575; margin-top: 5px; }
+
+        /* --- Button Styles (unchanged) --- */
+         .action-button { padding: 10px 20px; font-size: 1em; font-weight: bold; cursor: pointer; color: white; border: none; border-radius: 8px; margin: 5px; transition: transform 0.1s ease, box-shadow 0.2s ease, background 0.2s ease, opacity 0.2s ease; box-shadow: 0 3px 8px rgba(0,0,0,0.15); flex-grow: 1; flex-basis: 120px; max-width: 200px; }
+         .action-button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2); }
+         .action-button:active:not(:disabled) { transform: translateY(0); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15); }
+         .action-button:disabled { background: #bdbdbd !important; cursor: not-allowed; opacity: 0.7; box-shadow: none; transform: none; }
+         #check-button { background: linear-gradient(135deg, var(--correct-color), #388e3c); }
+         #more-clues-button { background: linear-gradient(135deg, var(--secondary-color), #e64a19); }
+         #hint-letter-button { background: linear-gradient(135deg, var(--accent-color), #ffa000); }
+         #give-up-button { background: linear-gradient(135deg, var(--give-up-color), #616161); }
+         #next-word-button { background: linear-gradient(135deg, #1e90ff, #1565c0); }
+         #button-area { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; margin-bottom: 20px; }
+
+        /* --- Feedback Area (unchanged) --- */
+        #feedback-area { margin-top: 15px; font-weight: bold; min-height: 30px; font-size: 1.1em; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .correct { color: var(--correct-color); } .incorrect { color: var(--incorrect-color); } .info { color: var(--font-color); }
+
+        /* --- Next Word Button (unchanged) --- */
+        #next-word-button { display: none; margin: 15px auto 0 auto; flex-grow: 0; max-width: 250px; }
+
+        /* --- Animations (unchanged) --- */
+        @keyframes pulse-green { /* ... */ } .correct-animation .letter-box { /* ... */ }
+        @keyframes shake-red { /* ... */ } .incorrect-animation { /* ... */ }
+
+        /* --- Responsive Adjustments (unchanged) --- */
+         @media (max-width: 640px) { /* ... existing styles ... */ }
+         @media (max-width: 400px) { /* ... existing styles ... */ }
+
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <h1>✨ Adjective Adventure! ✨</h1>
+
+        <div id="skill-area">
+            <label for="skill-slider">Difficulty:</label>
+            <input type="range" id="skill-slider" min="1" max="3" value="1">
+            <span id="skill-level-display">Easy</span>
+        </div>
+
+        <div id="clues-area">
+            <p>Your Clues:</p>
+            <ul id="clues-list"></ul>
+        </div>
+
+         <div id="word-display-area">
+            <input type="text" id="hidden-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Game input capture">
+            <div id="word-display"></div>
+            <div id="input-instructions">Tap here or use keyboard to type! (Backspace to erase)</div>
+         </div>
+
+         <div id="button-area">
+             <button id="check-button" class="action-button">✔️ Check Word</button>
+             <button id="more-clues-button" class="action-button">🔎 More Clues</button>
+             <button id="hint-letter-button" class="action-button">💡 Hint Letter</button>
+             <button id="give-up-button" class="action-button">🏳️ Give Up</button>
+         </div>
+
+
+        <div id="feedback-area"></div>
+
+        <button id="next-word-button" class="action-button">🎉 Next Word! 🎉</button>
+    </div>
+
+    <div id="score-board">
+        <div id="score-perfect">Perfect! <span id="score-perfect-count">0</span></div>
+        <div id="score-helped">With Help <span id="score-helped-count">0</span></div>
+        <div id="score-skipped">Skipped <span id="score-skipped-count">0</span></div>
+    </div>
+
+
+    <script>
+        // --- *** EXPANDED Word List *** ---
+        const wordList = [
+            // --- Easy (3-4 Letters) ---
+            // Animals
+            { word: "cat", clues: ["furry", "sleepy", "small", "meowing", "pet", "independent"] },
+            { word: "dog", clues: ["loyal", "barking", "friendly", "pet", "wagging", "four-legged"] },
+            { word: "pig", clues: ["pink", "muddy", "oinking", "farm", "curly-tailed", "snout"] },
+            { word: "cow", clues: ["mooing", "farm", "milked", "spotted", "large", "grassy"] },
+            { word: "bee", clues: ["buzzing", "yellow", "striped", "flying", "small", "honey"] },
+            { word: "ant", clues: ["tiny", "crawling", "strong", "black", "busy", "six-legged"] },
+            { word: "hen", clues: ["clucking", "farm", "feathery", "egg-laying", "female", "bird"] },
+            { word: "fox", clues: ["sly", "red", "bushy-tailed", "quick", "wild", "clever"] },
+            { word: "owl", clues: ["wise", "hooting", "night", "flying", "big-eyed", "feathery"] },
+            { word: "bat", clues: ["flying", "night", "winged", "dark", "cave-dwelling", "echoing"] },
+            // Food
+            { word: "jam", clues: ["sweet", "fruity", "sticky", "spreadable", "jarred", "red"] },
+            { word: "egg", clues: ["oval", "white", "shelled", "breakable", "fried", "scrambled"] },
+            { word: "nut", clues: ["hard", "shelled", "brown", "small", "crunchy", "oily"] },
+            { word: "tea", clues: ["hot", "drinkable", "brewed", "leafy", "cupped", "warm"] },
+            { word: "bun", clues: ["soft", "round", "baked", "bread-like", "sweet", "small"] },
+            { word: "pea", clues: ["green", "small", "round", "podded", "vegetable", "sweet"] },
+            { word: "fig", clues: ["sweet", "purple", "soft", "seedy", "fruity", "tree-grown"] },
+            // Objects / Nature / Places
+            { word: "sun", clues: ["bright", "hot", "yellow", "round", "fiery", "daytime"] },
+            { word: "car", clues: ["wheeled", "fast", "driven", "metal", "road-going", "noisy"] },
+            { word: "bed", clues: ["soft", "sleepy", "comfy", "four-legged", "bedroom", "pillowed"] },
+            { word: "box", clues: ["square", "cardboard", "empty", "lidded", "brown", "holding"] },
+            { word: "cup", clues: ["round", "handled", "drinking", "small", "ceramic", "breakable"] },
+            { word: "fan", clues: ["cooling", "windy", "bladed", "electric", "spinning", "breezy"] },
+            { word: "hat", clues: ["worn", "head", "brimmed", "round", "felt", "covering"] },
+            { word: "key", clues: ["metal", "small", "locking", "unlocking", "door", "turning"] },
+            { word: "map", clues: ["drawn", "folded", "paper", "guiding", "location", "road"] },
+            { word: "pen", clues: ["writing", "inky", "blue", "long", "thin", "clicking"] },
+            { word: "sky", clues: ["blue", "high", "cloudy", "vast", "airy", "overhead"] },
+            { word: "sea", clues: ["blue", "salty", "wet", "wavy", "deep", "vast"] },
+            { word: "ice", clues: ["cold", "frozen", "slippery", "hard", "clear", "melting"] },
+            { word: "log", clues: ["wooden", "brown", "heavy", "round", "tree-part", "rough"] },
+            { word: "mud", clues: ["brown", "wet", "squishy", "dirty", "sticky", "earthy"] },
+            { word: "rug", clues: ["soft", "floor", "woven", "patterned", "flat", "warm"] },
+            { word: "toy", clues: ["playful", "small", "plastic", "fun", "childs", "colorful"] },
+            { word: "van", clues: ["large", "boxy", "driven", "wheeled", "white", "sliding-door"] },
+            { word: "web", clues: ["sticky", "silken", "spider-made", "thin", "net-like", "intricate"] },
+            { word: "zoo", clues: ["animal", "caged", "public", "visiting", "wild", "enclosed"] },
+            { word: "park", clues: ["green", "grassy", "public", "playful", "tree-filled", "open"] },
+
+            // --- Medium (5 Letters) ---
+            // Animals
+            { word: "horse", clues: ["fast", "large", "maned", "neighing", "ridden", "strong"] },
+            { word: "mouse", clues: ["small", "grey", "squeaking", "cheesy", "quick", "tiny"] },
+            { word: "sheep", clues: ["woolly", "white", "baaing", "fluffy", "farm", "gentle"] },
+            { word: "tiger", clues: ["striped", "orange", "big", "wild", "roaring", "fierce"] },
+            { word: "whale", clues: ["huge", "ocean", "swimming", "blue", "spouting", "mammal"] },
+            { word: "shark", clues: ["toothy", "grey", "swimming", "ocean", "dangerous", "finned"] },
+            { word: "snake", clues: ["long", "slithering", "scaly", "hissing", "legless", "poisonous"] },
+            { word: "camel", clues: ["humped", "desert", "sandy", "brown", "spitting", "ridden"] },
+            { word: "zebra", clues: ["striped", "black-and-white", "African", "fast", "horse-like", "wild"] },
+            { word: "goose", clues: ["honking", "white", "feathery", "long-necked", "bird", "aggressive"] },
+            { word: "puppy", clues: ["young", "small", "playful", "barking", "cute", "dog"] },
+            { word: "lemur", clues: ["ring-tailed", "grey", "jumping", "Madagascar", "big-eyed", "primate"] },
+            // Food
+            { word: "apple", clues: ["red", "crunchy", "sweet", "round", "healthy", "juicy"] },
+            { word: "bread", clues: ["baked", "brown", "sliced", "soft", "crusty", "sandwich"] },
+            { word: "grape", clues: ["small", "purple", "round", "juicy", "sweet", "bunched"] },
+            { word: "lemon", clues: ["yellow", "sour", "oval", "juicy", "zesty", "tart"] },
+            { word: "melon", clues: ["green", "round", "juicy", "sweet", "large", "watery"] },
+            { word: "peach", clues: ["fuzzy", "orange", "sweet", "juicy", "round", "stone-fruit"] },
+            { word: "pizza", clues: ["round", "cheesy", "hot", "sliced", "saucy", "yummy"] },
+            { word: "salad", clues: ["green", "leafy", "fresh", "healthy", "bowled", "vegetable"] },
+            { word: "sugar", clues: ["sweet", "white", "powdery", "grainy", "treat", "dissolving"] },
+            { word: "toast", clues: ["browned", "warm", "buttered", "crispy", "breakfast", "sliced"] },
+            { word: "water", clues: ["wet", "clear", "drinkable", "splashy", "cool", "liquid"] },
+            { word: "honey", clues: ["sweet", "golden", "sticky", "bee-made", "liquid", "viscous"] },
+            { word: "bacon", clues: ["salty", "crispy", "fried", "streaky", "pork", "breakfast"] },
+            { word: "chips", clues: ["salty", "crispy", "fried", "thin", "potato", "snack"] },
+            // Objects / Nature / Places / Actions
+            { word: "chair", clues: ["four-legged", "wooden", "comfy", "sittable", "sturdy", "furniture"] },
+            { word: "clock", clues: ["round", "ticking", "numbered", "timely", "hanging", "handed"] },
+            { word: "cloud", clues: ["white", "fluffy", "sky", "rainy", "floating", "puffy"] },
+            { word: "earth", clues: ["round", "blue", "spinning", "planetary", "global", "living"] },
+            { word: "field", clues: ["green", "grassy", "open", "wide", "flat", "sunny"] },
+            { word: "glove", clues: ["hand-worn", "five-fingered", "warm", "protective", "paired", "soft"] },
+            { word: "house", clues: ["big", "bricky", "roofed", "home", "windowed", "doored"] },
+            { word: "light", clues: ["bright", "on", "shining", "electric", "lamp", "illuminating"] },
+            { word: "money", clues: ["green", "paper", "coined", "valuable", "spent", "earned"] },
+            { word: "music", clues: ["loud", "melodious", "rhythmic", "heard", "played", "song"] },
+            { word: "paper", clues: ["white", "thin", "flat", "writable", "tearable", "papery"] },
+            { word: "plant", clues: ["green", "leafy", "growing", "potted", "rooted", "living"] },
+            { word: "radio", clues: ["playing", "loud", "musical", "electric", "tuned", "antennaed"] },
+            { word: "river", clues: ["flowing", "wet", "long", "watery", "banked", "bridged"] },
+            { word: "shoes", clues: ["paired", "laced", "worn", "footwear", "walking", "comfy"] },
+            { word: "stone", clues: ["hard", "grey", "heavy", "rocky", "ground", "smooth"] },
+            { word: "table", clues: ["flat-topped", "four-legged", "wooden", "eating", "furniture", "sturdy"] },
+            { word: "train", clues: ["long", "fast", "tracked", "chugging", "metal", "passengered"] },
+            { word: "watch", clues: ["wrist-worn", "ticking", "small", "timely", "round", "strapped"] },
+            { word: "wheel", clues: ["round", "spinning", "rolling", "black", "rubber", "circular"] },
+            { word: "beach", clues: ["sandy", "sunny", "warm", "coastal", "shelly", "watery"] },
+            { word: "dream", clues: ["sleepy", "imaginary", "nightly", "vivid", "unreal", "mental"] },
+            { word: "laugh", clues: ["happy", "loud", "joyful", "funny", "vocal", "amused"] },
+            { word: "smile", clues: ["happy", "silent", "facial", "upturned", "pleased", "friendly"] },
+            { word: "storm", clues: ["windy", "rainy", "loud", "dark", "thundery", "wet"] },
+            { word: "magic", clues: ["mysterious", "unreal", "powerful", "tricky", "sparkly", "enchanting"] },
+            { word: "heart", clues: ["beating", "red", "loving", "internal", "vital", "pumping"] },
+
+            // --- Hard (6+ Letters) ---
+            // Animals
+            { word: "rabbit", clues: ["hopping", "long-eared", "fluffy", "white", "quick", "burrowing"] },
+            { word: "turtle", clues: ["slow", "shelled", "green", "hard-backed", "reptile", "swimming"] },
+            { word: "monkey", clues: ["climbing", "brown", "tailed", "chatty", "banana-eating", "primate"] },
+            { word: "donkey", clues: ["stubborn", "grey", "long-eared", "braying", "ridden", "strong"] },
+            { word: "spider", clues: ["eight-legged", "creepy", "web-spinning", "crawling", "hairy", "insect-eating"] },
+            { word: "lizard", clues: ["scaly", "green", "long-tailed", "four-legged", "sun-bathing", "reptile"] },
+            { word: "hamster", clues: ["small", "furry", "caged", "wheel-running", "cheek-pouching", "rodent"] },
+            { word: "dolphin", clues: ["smart", "grey", "swimming", "clicking", "oceanic", "playful"] },
+            { word: "penguin", clues: ["black-and-white", "waddling", "cold", "flightless", "swimming", "bird"] },
+            { word: "giraffe", clues: ["tall", "long-necked", "spotted", "African", "leaf-eating", "gentle"] },
+            { word: "chicken", clues: ["clucking", "feathery", "farm", "egg-laying", "pecking", "bird"] },
+            { word: "gorilla", clues: ["strong", "black", "large", "hairy", "chest-beating", "primate"] },
+            { word: "leopard", clues: ["spotted", "fast", "wild", "cat-like", "climbing", "predator"] },
+            { word: "octopus", clues: ["eight-armed", "tentacled", "inky", "oceanic", "smart", "soft-bodied"] },
+            // Food
+            { word: "banana", clues: ["yellow", "long", "curved", "sweet", "peelable", "soft"] },
+            { word: "orange", clues: ["round", "orange", "juicy", "peelable", "sweet", "citrus"] },
+            { word: "cookie", clues: ["sweet", "round", "baked", "chocolate-chip", "crunchy", "treat"] },
+            { word: "potato", clues: ["brown", "starchy", "earthy", "mashed", "fried", "vegetable"] },
+            { word: "tomato", clues: ["red", "round", "juicy", "squishy", "salad", "saucy"] },
+            { word: "butter", clues: ["yellow", "soft", "creamy", "spreadable", "dairy", "fatty"] },
+            { word: "cheese", clues: ["yellow", "holey", "dairy", "sliced", "melty", "strong-smelling"] },
+            { word: "carrot", clues: ["orange", "long", "crunchy", "pointy", "healthy", "vegetable"] },
+            { word: "cereal", clues: ["breakfast", "boxed", "milky", "crunchy", "grainy", "sugary"] },
+            { word: "waffle", clues: ["square-patterned", "breakfast", "syrupy", "crispy", "batter-made", "warm"] },
+            { word: "grapes", clues: ["bunched", "purple", "green", "small", "round", "juicy"] }, // Plural ok?
+            { word: "pepper", clues: ["spicy", "red", "green", "vegetable", "hot", "seasoning"] },
+            { word: "raisin", clues: ["dried", "wrinkled", "sweet", "dark", "small", "grape"] },
+            { word: "spinach", clues: ["green", "leafy", "healthy", "iron-rich", "wilty", "vegetable"] },
+            // Objects / Nature / Places / Actions
+            { word: "pencil", clues: ["writing", "yellow", "wooden", "long", "pointy", "erasable"] },
+            { word: "window", clues: ["clear", "glass", "see-through", "square", "framed", "opening"] },
+            { word: "bottle", clues: ["plastic", "glass", "capped", "liquid-holding", "round", "tall"] },
+            { word: "flower", clues: ["pretty", "colorful", "scented", "petaled", "growing", "stemmed"] },
+            { word: "friend", clues: ["kind", "loyal", "helpful", "playful", "caring", "known"] },
+            { word: "garden", clues: ["green", "flowery", "planted", "outside", "growing", "soil-filled"] },
+            { word: "guitar", clues: ["stringed", "musical", "played", "wooden", "loud", "acoustic"] },
+            { word: "island", clues: ["surrounded", "watery", "sandy", "remote", "tropical", "land"] },
+            { word: "jacket", clues: ["warm", "worn", "outer", "sleeved", "zipped", "buttoned"] },
+            { word: "kettle", clues: ["boiling", "hot", "whistling", "water-heating", "metal", "handled"] },
+            { word: "letter", clues: ["written", "mailed", "paper", "stamped", "folded", "addressed"] },
+            { word: "mirror", clues: ["reflective", "shiny", "glassy", "image-showing", "smooth", "framed"] },
+            { word: " नम्बर", clues: ["counted", "numeric", "ordered", "digit", "math", "sequential"] }, // Number in Hindi (example)
+            { word: "palace", clues: ["royal", "grand", "large", "stone", "kingly", "ornate"] },
+            { word: "planet", clues: ["round", "orbiting", "large", "space", "celestial", "distant"] },
+            { word: "pocket", clues: ["small", "fabric", "holding", "sewn-in", "empty", "hidden"] },
+            { word: "school", clues: ["learning", "bricky", "classroomed", "student-filled", "instructional", "educational"] },
+            { word: "screen", clues: ["flat", "glowing", "digital", "viewing", "electronic", "touchable"] },
+            { word: "street", clues: ["paved", "long", "road-like", "driven-on", "lined", "public"] },
+            { word: "yellow", clues: ["bright", "sunny", "lemon-colored", "primary", "light", "golden"] }, // Color
+            { word: "purple", clues: ["grape-colored", "violet", "royal", "deep", "mixed", "secondary"] }, // Color
+            { word: "orange", clues: ["fruit-colored", "bright", "secondary", "vibrant", "warm", "citrusy"] }, // Color
+            { word: "family", clues: ["related", "loving", "supportive", "together", "caring", "household"] },
+            { word: "crayon", clues: ["waxy", "colorful", "drawing", "pointed", "boxed", "breakable"] },
+            { word: "rocket", clues: ["fast", "space-going", "fiery", "tall", "pointed", "launched"] },
+            { word: "castle", clues: ["stone", "old", "towered", "royal", "defensive", "moated"] },
+            { word: "forest", clues: ["tree-filled", "green", "shady", "wild", "wooded", "dense"] },
+            { word: "jungle", clues: ["green", "dense", "viny", "wild", "tropical", "animal-filled"] },
+            { word: "market", clues: ["busy", "selling", "buying", "crowded", "open", "food-filled"] },
+            { word: "office", clues: ["working", "desked", "computered", "professional", "indoor", "business"] },
+            { word: "circus", clues: ["funny", "tented", "acrobatic", "clowned", "performing", "ringed"] },
+            { word: "picnic", clues: ["outdoor", "blanketed", "food-filled", "sunny", "basketed", "leisurely"] },
+            { word: "puzzle", clues: ["pieced", "tricky", "solvable", "boxed", "interlocking", "challenging"] },
+            { word: "sleepy", clues: ["tired", "yawning", "drowsy", "nightly", "resting", "quiet"] }, // Adjective as word
+            { word: "strong", clues: ["powerful", "muscly", "heavy-lifting", "tough", "sturdy", "forceful"] }, // Adjective as word
+            { word: "winter", clues: ["cold", "snowy", "icy", "freezing", "short-dayed", "seasonal"] },
+            { word: "summer", clues: ["hot", "sunny", "warm", "long-dayed", "vacation", "seasonal"] },
+            { word: "bright", clues: ["shiny", "light", "glowing", "sunny", "vivid", "clear"] }, // Adjective as word
+            { word: "purple", clues: ["violet", "grape-like", "dark", "mixed", "royal", "deep"] }, // Adjective as word
+
+        ];
+
+        // --- State Variables (unchanged) ---
+        let currentWordData = {}; let currentWord = ""; let displayedClues = []; let remainingClues = []; let hintedLetters; let userTypedLetters; let hintIndices = []; let gameWon = false; let gameActive = false; let hintsWereUsed = false; let cluesWereUsed = false; let scoreFirstTry = 0; let scoreWithHints = 0; let scoreSkipped = 0; const INITIAL_CLUE_COUNT = 2;
+
+        // --- DOM Elements (unchanged) ---
+        const cluesList = document.getElementById('clues-list'); const wordDisplay = document.getElementById('word-display'); const wordDisplayArea = document.getElementById('word-display-area'); const checkButton = document.getElementById('check-button'); const moreCluesButton = document.getElementById('more-clues-button'); const hintLetterButton = document.getElementById('hint-letter-button'); const giveUpButton = document.getElementById('give-up-button'); const feedbackArea = document.getElementById('feedback-area'); const nextWordButton = document.getElementById('next-word-button'); const scorePerfectCount = document.getElementById('score-perfect-count'); const scoreHelpedCount = document.getElementById('score-helped-count'); const scoreSkippedCount = document.getElementById('score-skipped-count'); const hiddenInput = document.getElementById('hidden-input'); const skillSlider = document.getElementById('skill-slider'); const skillLevelDisplay = document.getElementById('skill-level-display');
+
+        // --- Game Logic Functions (updateSkillDisplay, getFilteredWordList, getRandomWord, updateScoreDisplay, disable/enableActionButtons, initializeWord, updateDisplay, handleInput, handleBackspace, checkAnswer, handleMoreClues, handleHintLetter, handleGiveUp - unchanged from previous version) ---
+        function updateSkillDisplay() { const level = parseInt(skillSlider.value); let levelText = "Medium"; if (level === 1) levelText = "Easy"; else if (level === 3) levelText = "Hard"; skillLevelDisplay.textContent = levelText; }
+        function getFilteredWordList() { const level = parseInt(skillSlider.value); let minLength, maxLength; if (level === 1) { minLength = 3; maxLength = 4; } else if (level === 3) { minLength = 6; maxLength = 10; } else { minLength = 5; maxLength = 5; } let filtered = wordList.filter(w => w.word.length >= minLength && w.word.length <= maxLength); if (filtered.length === 0) { console.warn(`No words found for difficulty ${level}. Falling back to Easy.`); filtered = wordList.filter(w => w.word.length >= 3 && w.word.length <= 4); if (filtered.length === 0) { console.error("No words found in Easy fallback. Using full list."); filtered = wordList; } } return filtered; }
+        function getRandomWord() { const filteredList = getFilteredWordList(); const availableWords = filteredList.filter(w => w.word !== currentWord); const listToUse = availableWords.length > 0 ? availableWords : filteredList; if (listToUse.length === 0) { console.error("Cannot find any word!"); return { word: "ERROR", clues: ["problem", "issue", "bug", "broken"] }; } const randomIndex = Math.floor(Math.random() * listToUse.length); return listToUse[randomIndex]; }
+        function updateScoreDisplay() { scorePerfectCount.textContent = scoreFirstTry; scoreHelpedCount.textContent = scoreWithHints; scoreSkippedCount.textContent = scoreSkipped; }
+        function disableActionButtons() { checkButton.disabled = true; moreCluesButton.disabled = true; hintLetterButton.disabled = true; giveUpButton.disabled = true; }
+        function enableActionButtons() { checkButton.disabled = false; moreCluesButton.disabled = remainingClues.length === 0 || gameWon || !gameActive; hintLetterButton.disabled = hintIndices.length === 0 || gameWon || !gameActive; giveUpButton.disabled = false; }
+        function initializeWord() { gameWon = false; gameActive = true; hintsWereUsed = false; cluesWereUsed = false; currentWordData = getRandomWord(); currentWord = currentWordData.word.toUpperCase(); hintedLetters = Array(currentWord.length).fill(null); userTypedLetters = Array(currentWord.length).fill(null); hintIndices = Array.from(Array(currentWord.length).keys()); const allClues = [...currentWordData.clues]; allClues.sort(() => Math.random() - 0.5); displayedClues = allClues.slice(0, INITIAL_CLUE_COUNT); remainingClues = allClues.slice(INITIAL_CLUE_COUNT); feedbackArea.textContent = ""; feedbackArea.className = ""; nextWordButton.style.display = 'none'; wordDisplayArea.classList.remove('correct-animation', 'incorrect-animation'); enableActionButtons(); updateDisplay(); updateScoreDisplay(); setTimeout(() => { hiddenInput.focus(); hiddenInput.value = ''; }, 100); }
+        function updateDisplay() { cluesList.innerHTML = displayedClues.map(clue => `<li>${clue}</li>`).join(''); wordDisplay.innerHTML = ''; let nextLetterIndex = -1; for (let i = 0; i < currentWord.length; i++) { const letterBox = document.createElement('div'); letterBox.classList.add('letter-box'); let displayLetter = '_'; if (hintedLetters[i] !== null) { displayLetter = hintedLetters[i]; letterBox.classList.add('hinted'); } else if (userTypedLetters[i] !== null) { displayLetter = userTypedLetters[i]; letterBox.classList.add('filled'); } else { if (nextLetterIndex === -1 && gameActive && !gameWon) { nextLetterIndex = i; } } letterBox.textContent = displayLetter; wordDisplay.appendChild(letterBox); } if (nextLetterIndex !== -1) { const boxes = wordDisplay.children; if (boxes[nextLetterIndex]) { boxes[nextLetterIndex].classList.add('next-letter'); } } moreCluesButton.disabled = remainingClues.length === 0 || gameWon || !gameActive; hintLetterButton.disabled = hintIndices.length === 0 || gameWon || !gameActive; checkButton.disabled = gameWon || !gameActive; giveUpButton.disabled = gameWon || !gameActive; }
+        function handleInput(event) { if (!gameActive || gameWon) return; const typedValue = event.target.value; event.target.value = ''; if (typedValue.length > 0) { const typedChar = typedValue.slice(-1).toUpperCase(); if (typedChar >= 'A' && typedChar <= 'Z') { let placed = false; for (let i = 0; i < currentWord.length; i++) { if (userTypedLetters[i] === null && hintedLetters[i] === null) { userTypedLetters[i] = typedChar; placed = true; break; } } } feedbackArea.textContent = ""; feedbackArea.className = ""; wordDisplayArea.classList.remove('incorrect-animation'); } updateDisplay(); }
+        function handleBackspace(event) { if (!gameActive || gameWon) return; if (event.key === 'Backspace') { event.preventDefault(); for (let i = userTypedLetters.length - 1; i >= 0; i--) { if (userTypedLetters[i] !== null && hintedLetters[i] === null) { userTypedLetters[i] = null; break; } } feedbackArea.textContent = ""; feedbackArea.className = ""; wordDisplayArea.classList.remove('incorrect-animation'); updateDisplay(); } }
+        function checkAnswer() { if (gameWon || !gameActive) return; const currentGuess = userTypedLetters.map((letter, index) => hintedLetters[index] ?? letter ?? '').join(''); const isComplete = currentGuess.length === currentWord.length && !currentGuess.includes(''); if (currentGuess === currentWord) { gameWon = true; gameActive = false; if (!hintsWereUsed && !cluesWereUsed) { scoreFirstTry++; feedbackArea.innerHTML = "✔️ Perfect! ✨"; } else { scoreWithHints++; feedbackArea.innerHTML = "✔️ Correct! Good job! 😊"; } feedbackArea.className = "correct"; nextWordButton.style.display = 'block'; wordDisplayArea.classList.add('correct-animation'); hintedLetters = currentWord.split(''); userTypedLetters.fill(null); updateDisplay(); updateScoreDisplay(); disableActionButtons(); } else if (isComplete) { feedbackArea.innerHTML = `❌ That's not it. Check the clues! 🤔`; feedbackArea.className = "incorrect"; wordDisplayArea.classList.add('incorrect-animation'); setTimeout(() => wordDisplayArea.classList.remove('incorrect-animation'), 500); } else { feedbackArea.innerHTML = `Keep typing! You can do it! 👍`; feedbackArea.className = "info"; wordDisplayArea.classList.remove('incorrect-animation'); } }
+        function handleMoreClues() { if (remainingClues.length > 0 && gameActive) { displayedClues.push(remainingClues.shift()); cluesWereUsed = true; feedbackArea.textContent = ""; updateDisplay(); } }
+        function handleHintLetter() { if (hintIndices.length > 0 && gameActive) { hintsWereUsed = true; const randomHintIndexPosition = Math.floor(Math.random() * hintIndices.length); const indexToReveal = hintIndices[randomHintIndexPosition]; hintedLetters[indexToReveal] = currentWord[indexToReveal]; userTypedLetters[indexToReveal] = null; hintIndices.splice(randomHintIndexPosition, 1); feedbackArea.textContent = ""; const currentState = hintedLetters.map((h, i) => h ?? userTypedLetters[i] ?? '').join(''); const isNowComplete = currentState.length === currentWord.length && !currentState.includes(''); if (isNowComplete && currentState === currentWord) { gameWon = true; gameActive = false; scoreSkipped++; feedbackArea.innerHTML = `💡 Hints revealed the word: ${currentWord}`; feedbackArea.className = "info"; updateDisplay(); updateScoreDisplay(); disableActionButtons(); setTimeout(() => { nextWordButton.style.display = 'block'; }, 1500); } else { updateDisplay(); if (hintIndices.length === 0) { hintLetterButton.disabled = true; } } } }
+        function handleGiveUp() { if (!gameActive || gameWon) return; gameWon = true; gameActive = false; scoreSkipped++; feedbackArea.innerHTML = `🏳️ The word was: ${currentWord}`; feedbackArea.className = "info"; hintedLetters = currentWord.split(''); userTypedLetters.fill(null); updateDisplay(); updateScoreDisplay(); disableActionButtons(); setTimeout(() => { nextWordButton.style.display = 'block'; }, 1500); }
+
+        // --- Event Listeners (unchanged) ---
+        checkButton.addEventListener('click', checkAnswer); moreCluesButton.addEventListener('click', handleMoreClues); hintLetterButton.addEventListener('click', handleHintLetter); giveUpButton.addEventListener('click', handleGiveUp); nextWordButton.addEventListener('click', initializeWord); hiddenInput.addEventListener('input', handleInput); hiddenInput.addEventListener('keydown', handleBackspace); wordDisplayArea.addEventListener('click', () => { hiddenInput.focus(); }); skillSlider.addEventListener('input', updateSkillDisplay);
+
+        // Initialize
+        updateSkillDisplay(); initializeWord(); updateScoreDisplay();
+
+    </script>
+
+</body>
+</html>
